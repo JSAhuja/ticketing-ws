@@ -1,0 +1,8 @@
+{
+  "id": "A-1",
+  "fromStation": "London",
+  "toStation": "FRANCE",
+  "seatNumber": 1,
+  "section": "A",
+  "bookingId": "340af30b-b01d-41dd-a5dc-2b78151b1303"
+}
