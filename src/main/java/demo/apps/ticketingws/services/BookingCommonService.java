@@ -47,8 +47,10 @@ public class BookingCommonService {
     }
 
     public String getNextAvailableSectionSeat() {
+        log.info("Trying to retrieve the next available seat");
         Optional<TrainOccupancyEntity> seatsAvailableSeatDetails = trainSeatRepo.getSeatsAvailableSeatDetails();
         if(seatsAvailableSeatDetails.isPresent()){
+            log.info("Availability found");
             return seatsAvailableSeatDetails.get().getId();
         }
         else {
@@ -57,6 +59,7 @@ public class BookingCommonService {
     }
 
     public boolean seatAllocationInTrain(String seatId, String bookingID) {
+        log.info("Request received to allocate seat:{} with booking id:{}",seatId,bookingID);
         Optional<TrainOccupancyEntity> trainSeatRepoById = trainSeatRepo.findById(seatId);
         if (trainSeatRepoById.isPresent() && !trainSeatRepoById.get().isAllocated()) {
             TrainOccupancyEntity trainOccupancyEntity = trainSeatRepoById.get();
@@ -64,6 +67,7 @@ public class BookingCommonService {
             trainOccupancyEntity.setBookingId(bookingID);
             trainSeatRepo.save(trainOccupancyEntity);
             actionLogRepo.addBookingActionLogs(bookingID,BookingActions.ALLOCATED,"Ticket is booked");
+            log.info("Allocation of seat:{} with booking id:{} is successful",seatId,bookingID);
             return true;
         } else {
             return false;
@@ -71,22 +75,28 @@ public class BookingCommonService {
     }
 
     public void seatDeAllocationInTrainByBookingId(String bookingID) {
+        log.info("Request received to deallocate seat corresponding to booking id:{}",bookingID);
         Optional<TrainOccupancyEntity> recordByBookingID = trainSeatRepo.findTrainSeatDetailsByBookingID(bookingID);
+        log.info("Valid Booking id:{} found",bookingID);
         if (recordByBookingID.isPresent()) {
             recordByBookingID.get().setAllocated(false);
             recordByBookingID.get().setBookingId("");
             trainSeatRepo.save(recordByBookingID.get());
+            log.info("De-allocation for Booking id:{} is successfully completed in TrainSeat repo",bookingID);
         } else {
             throw new ValidationException("Booking Id not found for the train");
         }
     }
 
     public void deAllocateBooking(String bookingId, BookingActions action, String s) {
+        log.info("Request received to deallocate seat corresponding to booking id:{}",bookingId);
         Optional<BookingEntity> bookingDetailsByBookingId = bookingRepo.findBookingDetailsByBookingId(bookingId);
         if (bookingDetailsByBookingId.isPresent() && bookingDetailsByBookingId.get().isActive()) {
+            log.info("Valid Booking id:{} found",bookingId);
             BookingEntity bookingEntity = bookingDetailsByBookingId.get();
             bookingEntity.setActive(false);
             bookingRepo.save(bookingEntity);
+            log.info("De-allocation for Booking id:{} is successfully completed in TrainSeat repo",bookingId);
             actionLogRepo.addBookingActionLogs(bookingId, action, s);
         } else
             throw new ValidationException("Failed in deallocating the booking");

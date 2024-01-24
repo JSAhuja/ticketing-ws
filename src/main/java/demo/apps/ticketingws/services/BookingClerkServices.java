@@ -40,26 +40,34 @@ public class BookingClerkServices {
     }
 
     public String changeSeat(ChangeSeatAllocationRequestDTO requestDTO) {
+        log.info("Request received to change the seat for the booking id:{}",requestDTO.getCurrentBookingId());
 // Step1 Find if valid booking ID
         final Optional<BookingEntity> bookingDetailsById = bookingCommonService.getBookingDetailsById(requestDTO.getCurrentBookingId());
         if (bookingDetailsById.isEmpty()) {
             throw new ValidationException("Invalid booking ID provided");
         }
+        log.info("Valid booking id:{} found in DB",requestDTO.getCurrentBookingId());
 // Step2 Add new entry in Booking;
         final BookingEntity bookingEntityBasedOnRequestDto = bookingDetailsById.get();
+        log.info("Updating the booking repo with as a replacement for old booking id:{}",requestDTO.getCurrentBookingId());
         BookingEntity newBookingEntity = BookingEntity.builder()
                 .ticketCost(bookingEntityBasedOnRequestDto.getTicketCost())
                 .user(PassengerUser.builder().firstName(bookingEntityBasedOnRequestDto.getUser().getFirstName()).lastName(bookingEntityBasedOnRequestDto.getUser().getLastName()).email(bookingEntityBasedOnRequestDto.getUser().getEmail()).build())
                 .isActive(true)
                 .build();
         String newTicketId = bookingRepo.save(newBookingEntity);
+        log.info("New booking id:{} replacement for the old booking id:{}",newTicketId,requestDTO.getCurrentBookingId());
+
 // Step3 Allocate Seat in Train
+        log.info("Trying to allocate seat corresponding to the new booking id:{}",newTicketId);
         boolean seatAllocationInTrain = bookingCommonService.seatAllocationInTrain(bookingCommonService.generateTrainSeatId(requestDTO.getTrainSectionSelected(), requestDTO.getSeatNumberSelected()), newTicketId);
         if (!seatAllocationInTrain) {
             throw new ValidationException("Not able to allocate seat in train");
         }
+        log.info("Allocated successfully seat corresponding to the new booking id:{}",newTicketId);
 // Step4 Deallocate Seat
         deallocateSeat(requestDTO.getCurrentBookingId(),BookingActions.SEAT_CHANGE);
+        log.info("Deallocation of the old booking ID:{} is completed",requestDTO.getCurrentBookingId());
         return newTicketId;
     }
 }

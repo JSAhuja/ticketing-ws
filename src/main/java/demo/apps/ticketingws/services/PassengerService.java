@@ -36,11 +36,16 @@ public class PassengerService {
     PriceMapperRepo priceMapperRepo;
 
     public String bookTicket(TicketBookingRequestDTO requestDTO) {
+        log.info("Request received to book ticket");
         Optional<PriceMapperEntity> price = priceMapperRepo.getPrice(requestDTO.getFromStation(), requestDTO.getDestinationStation());
+        log.info("Valid from and to destination mapping found");
         if (price.isEmpty()) {
+            log.error("No mapping found for Start:{} and To:{}",requestDTO.getFromStation(),requestDTO.getDestinationStation());
             throw new ValidationException("We are not serving the station you have selected");
         }
+        log.info("Validating the seat avaialbility");
         if (bookingHelperService.isSeatAvailable()) {
+            log.info("Seat(s) is/are Available");
             return assignSeat(requestDTO, price.get());
         } else {
             throw new ValidationException("Train is Full");
@@ -56,7 +61,9 @@ public class PassengerService {
     }
 
     private String assignSeat(TicketBookingRequestDTO requestDTO, PriceMapperEntity price) {
+        log.info("Try to get a available seat id");
         String availableSeatID = bookingHelperService.getNextAvailableSectionSeat();
+        log.info("Valid ");
         String bookingId = bookingRepo.save(transformerTicketRequestToEntity(requestDTO, price));
         bookingHelperService.seatAllocationInTrain(availableSeatID, bookingId);
         return bookingId;
