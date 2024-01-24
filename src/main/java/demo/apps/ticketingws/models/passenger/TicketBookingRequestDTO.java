@@ -3,6 +3,7 @@ package demo.apps.ticketingws.models.passenger;
 import lombok.Builder;
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -17,4 +18,6 @@ public class TicketBookingRequestDTO {
     private String destinationStation;
     @NotNull
     private PassengerUser userDetails;
+    @Min(1)
+    private double amountPaid;
 }

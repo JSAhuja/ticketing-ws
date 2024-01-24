@@ -52,6 +52,7 @@ class PassengerTest {
     void bookTicketTest(){
         TicketBookingRequestDTO requestDTO=TicketBookingRequestDTO.builder()
                 .destinationStation("France").fromStation("London")
+                .amountPaid(12)
                 .userDetails(PassengerUser.builder().firstName("Jivtesh").lastName("Ahuja").email("email.gmail.com").build())
                 .build();
         TrainOccupancyEntity trainOccupancyEntity = TrainOccupancyEntity.builder().isAllocated(false)
@@ -79,6 +80,7 @@ class PassengerTest {
     @Test
     void bookTicketTest_statingMappingNotPresent(){
         TicketBookingRequestDTO requestDTO=TicketBookingRequestDTO.builder()
+                .amountPaid(120)
                 .destinationStation("France").fromStation("DELHI")
                 .userDetails(PassengerUser.builder().firstName("Jivtesh").lastName("Ahuja").email("email.gmail.com").build())
                 .build();
@@ -97,6 +99,7 @@ class PassengerTest {
     void bookTicketTest_capacityValidator(){
         TicketBookingRequestDTO requestDTO=TicketBookingRequestDTO.builder()
                 .destinationStation("France").fromStation("London")
+                .amountPaid(12)
                 .userDetails(PassengerUser.builder().firstName("Jivtesh").lastName("Ahuja").email("email.gmail.com").build())
                 .build();
         when(trainSeatRepo.getSeatsAvailableCount()).thenReturn(0L);
